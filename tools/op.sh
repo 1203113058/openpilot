@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# 检查脚本是否被source而不是直接执行
 if [[ ! "${BASH_SOURCE[0]}" = "${0}" ]]; then
   echo "Invalid invocation! This script must not be sourced."
   echo "Run 'op.sh' directly or check your .bashrc for a valid alias"
@@ -8,17 +9,21 @@ fi
 
 set -e
 
+# 定义颜色和样式常量
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 UNDERLINE='\033[4m'
 BOLD='\033[1m'
 NC='\033[0m'
 
+# 确定shell类型和配置文件路径
 SHELL_NAME="$(basename ${SHELL})"
 RC_FILE="${HOME}/.$(basename ${SHELL})rc"
 if [ "$(uname)" == "Darwin" ] && [ $SHELL == "/bin/bash" ]; then
   RC_FILE="$HOME/.bash_profile"
 fi
+
+# 安装op命令到系统
 function op_install() {
   echo "Installing op system-wide..."
   CMD="\nalias op='"$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )/op.sh" \"\$@\"'\n"
@@ -26,6 +31,7 @@ function op_install() {
   echo -e " ↳ [${GREEN}✔${NC}] op installed successfully. Open a new shell to use it."
 }
 
+# 记录错误日志
 function loge() {
   if [[ -f "$LOG_FILE" ]]; then
     # error type
@@ -35,6 +41,7 @@ function loge() {
   fi
 }
 
+# 运行命令并显示格式化输出
 function op_run_command() {
   CMD="$@"
 
@@ -49,10 +56,11 @@ function op_run_command() {
   fi
 }
 
-# be default, assume openpilot dir is in current directory
+# 默认假设openpilot目录在当前目录
 OPENPILOT_ROOT=$(pwd)
+# 查找openpilot目录
 function op_get_openpilot_dir() {
-  # First try traversing up the directory tree
+  # 首先尝试向上遍历目录树
   while [[ "$OPENPILOT_ROOT" != '/' ]];
   do
     if find "$OPENPILOT_ROOT/launch_openpilot.sh" -maxdepth 1 -mindepth 1 &> /dev/null; then
@@ -61,7 +69,7 @@ function op_get_openpilot_dir() {
     OPENPILOT_ROOT="$(readlink -f "$OPENPILOT_ROOT/"..)"
   done
 
-  # Fallback to hardcoded directories if not found
+  # 如果未找到，回退到硬编码的目录
   for dir in "$HOME/openpilot" "/data/openpilot"; do
     if [[ -f "$dir/launch_openpilot.sh" ]]; then
       OPENPILOT_ROOT="$dir"
@@ -70,6 +78,7 @@ function op_get_openpilot_dir() {
   done
 }
 
+# 安装git post-commit钩子
 function op_install_post_commit() {
   op_get_openpilot_dir
   if [[ ! -d $OPENPILOT_ROOT/.git/hooks/post-commit.d ]]; then
@@ -80,6 +89,7 @@ function op_install_post_commit() {
   ln -sf ../../scripts/post-commit post-commit
 }
 
+# 检查openpilot目录是否存在
 function op_check_openpilot_dir() {
   echo "Checking for openpilot directory..."
   if [[ -f "$OPENPILOT_ROOT/launch_openpilot.sh" ]]; then
@@ -93,6 +103,7 @@ function op_check_openpilot_dir() {
   return 1
 }
 
+# 检查git是否安装及相关文件
 function op_check_git() {
   echo "Checking for git..."
   if ! command -v "git" > /dev/null 2>&1; then
@@ -120,6 +131,7 @@ function op_check_git() {
   echo -e " ↳ [${GREEN}✔${NC}] git submodules found."
 }
 
+# 检查操作系统兼容性
 function op_check_os() {
   echo "Checking for compatible os version..."
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
@@ -151,6 +163,7 @@ function op_check_os() {
   fi
 }
 
+# 检查Python版本兼容性
 function op_check_python() {
   echo "Checking for compatible python version..."
   REQUIRED_PYTHON_VERSION=$(grep "requires-python" $OPENPILOT_ROOT/pyproject.toml)
@@ -174,6 +187,7 @@ function op_check_python() {
   fi
 }
 
+# 检查虚拟环境
 function op_check_venv() {
   echo "Checking for venv..."
   if [[ -f $OPENPILOT_ROOT/.venv/bin/activate ]]; then
@@ -183,6 +197,7 @@ function op_check_venv() {
   fi
 }
 
+# 执行命令前的检查
 function op_before_cmd() {
   if [[ ! -z "$NO_VERIFY" ]]; then
     return 0
@@ -207,6 +222,7 @@ function op_before_cmd() {
   fi
 }
 
+# 设置openpilot环境
 function op_setup() {
   op_get_openpilot_dir
   cd $OPENPILOT_ROOT
@@ -252,11 +268,13 @@ function op_setup() {
   op_check
 }
 
+# API认证
 function op_auth() {
   op_before_cmd
   op_run_command tools/lib/auth.py "$@"
 }
 
+# 激活虚拟环境
 function op_activate_venv() {
   # bash 3.2 can't handle this without the 'set +e'
   set +e
@@ -264,6 +282,7 @@ function op_activate_venv() {
   set -e
 }
 
+# 进入虚拟环境shell
 function op_venv() {
   op_before_cmd
 
@@ -282,22 +301,26 @@ function op_venv() {
   esac
 }
 
+# 运行adb shell
 function op_adb() {
   op_before_cmd
   op_run_command tools/scripts/adb_ssh.sh
 }
 
+# 检查环境
 function op_check() {
   VERBOSE=1
   op_before_cmd
   unset VERBOSE
 }
 
+# 管理eSIM配置
 function op_esim() {
   op_before_cmd
   op_run_command system/hardware/esim.py "$@"
 }
 
+# 构建项目
 function op_build() {
   CDIR=$(pwd)
   op_before_cmd
@@ -311,42 +334,50 @@ function op_build() {
   fi
 }
 
+# 运行PlotJuggler工具
 function op_juggle() {
   op_before_cmd
   op_run_command tools/plotjuggler/juggle.py $@
 }
 
+# 运行代码检查
 function op_lint() {
   op_before_cmd
   op_run_command scripts/lint/lint.sh $@
 }
 
+# 运行测试
 function op_test() {
   op_before_cmd
   op_run_command pytest $@
 }
 
+# 运行回放工具
 function op_replay() {
   op_before_cmd
   op_run_command tools/replay/replay $@
 }
 
+# 运行Cabana工具
 function op_cabana() {
   op_before_cmd
   op_run_command tools/cabana/cabana $@
 }
 
+# 运行模拟器
 function op_sim() {
   op_before_cmd
   op_run_command exec tools/sim/run_bridge.py &
   op_run_command exec tools/sim/launch_openpilot.sh
 }
 
+# 运行CLIP工具
 function op_clip() {
   op_before_cmd
   op_run_command tools/clip/run.py $@
 }
 
+# 切换分支
 function op_switch() {
   REMOTE="origin"
   if [ "$#" -gt 1 ]; then
@@ -370,6 +401,7 @@ function op_switch() {
   git submodule foreach git clean -df
 }
 
+# 启动openpilot
 function op_start() {
   if [[ -f "/AGNOS" ]]; then
     op_before_cmd
@@ -377,6 +409,7 @@ function op_start() {
   fi
 }
 
+# 停止openpilot
 function op_stop() {
   if [[ -f "/AGNOS" ]]; then
     op_before_cmd
@@ -384,6 +417,7 @@ function op_stop() {
   fi
 }
 
+# 显示帮助信息
 function op_default() {
   echo "An openpilot helper"
   echo ""
@@ -439,7 +473,7 @@ function op_default() {
   echo "          Run PlotJuggler on the demo route"
 }
 
-
+# 主函数，解析参数并执行相应命令
 function _op() {
   # parse Options
   case $1 in
@@ -475,4 +509,5 @@ function _op() {
   esac
 }
 
+# 执行主函数
 _op $@

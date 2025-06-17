@@ -1,65 +1,65 @@
-name: docs
+name: docs  # 文档
 
-on:
-  push:
-    branches:
-      - master
-  pull_request:
-  workflow_call:
-    inputs:
-      run_number:
-        default: '1'
-        required: true
-        type: string
-concurrency:
-  group: docs-tests-ci-run-${{ inputs.run_number }}-${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && github.run_id || github.head_ref || github.ref }}-${{ github.workflow }}-${{ github.event_name }}
-  cancel-in-progress: true
+on:  # 触发条件
+  push:  # 推送时触发
+    branches:  # 分支
+      - master  # 主分支
+  pull_request:  # 拉取请求时触发
+  workflow_call:  # 工作流调用时触发
+    inputs:  # 输入参数
+      run_number:  # 运行编号
+        default: '1'  # 默认值为1
+        required: true  # 必需参数
+        type: string  # 字符串类型
+concurrency:  # 并发设置
+  group: docs-tests-ci-run-${{ inputs.run_number }}-${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && github.run_id || github.head_ref || github.ref }}-${{ github.workflow }}-${{ github.event_name }}  # 并发组
+  cancel-in-progress: true  # 取消进行中的任务
 
-jobs:
-  docs:
-    name: build docs
-    runs-on: ubuntu-24.04
-    steps:
-    - uses: commaai/timeout@v1
+jobs:  # 任务
+  docs:  # 文档任务
+    name: build docs  # 构建文档
+    runs-on: ubuntu-24.04  # 在Ubuntu 24.04上运行
+    steps:  # 步骤
+    - uses: commaai/timeout@v1  # 使用comma.ai的超时操作
 
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
+    - uses: actions/checkout@v4  # 检出代码
+      with:  # 参数
+        submodules: true  # 包含子模块
 
-    # Build
-    - name: Build docs
-      run: |
-        # TODO: can we install just the "docs" dependency group without the normal deps?
-        pip install mkdocs
-        mkdocs build
+    # Build  # 构建
+    - name: Build docs  # 构建文档
+      run: |  # 运行命令
+        # TODO: can we install just the "docs" dependency group without the normal deps?  # TODO: 我们能否只安装"docs"依赖组而不安装普通依赖项？
+        pip install mkdocs  # 安装mkdocs
+        mkdocs build  # 构建mkdocs
 
-    # Push to docs.comma.ai
-    - uses: actions/checkout@v4
-      if: github.ref == 'refs/heads/master' && github.repository == 'commaai/openpilot'
-      with:
-        path: openpilot-docs
-        ssh-key: ${{ secrets.OPENPILOT_DOCS_KEY }}
-        repository: commaai/openpilot-docs
-    - name: Push
-      if: github.ref == 'refs/heads/master' && github.repository == 'commaai/openpilot'
-      run: |
-        set -x
+    # Push to docs.comma.ai  # 推送到docs.comma.ai
+    - uses: actions/checkout@v4  # 检出代码
+      if: github.ref == 'refs/heads/master' && github.repository == 'commaai/openpilot'  # 如果是主分支且是commaai/openpilot仓库
+      with:  # 参数
+        path: openpilot-docs  # 路径为openpilot-docs
+        ssh-key: ${{ secrets.OPENPILOT_DOCS_KEY }}  # 使用OPENPILOT_DOCS_KEY密钥
+        repository: commaai/openpilot-docs  # 仓库为commaai/openpilot-docs
+    - name: Push  # 推送
+      if: github.ref == 'refs/heads/master' && github.repository == 'commaai/openpilot'  # 如果是主分支且是commaai/openpilot仓库
+      run: |  # 运行命令
+        set -x  # 启用命令回显
 
-        source release/identity.sh
+        source release/identity.sh  # 加载身份信息
 
-        cd openpilot-docs
-        git checkout --orphan tmp
-        git rm -rf .
+        cd openpilot-docs  # 进入openpilot-docs目录
+        git checkout --orphan tmp  # 创建一个新的孤立分支tmp
+        git rm -rf .  # 删除所有文件
 
-        # copy over docs
-        cp -r ../docs_site/ docs/
+        # copy over docs  # 复制文档
+        cp -r ../docs_site/ docs/  # 将docs_site目录复制到docs目录
 
-        # GitHub pages config
-        touch docs/.nojekyll
-        echo -n docs.comma.ai > docs/CNAME
+        # GitHub pages config  # GitHub页面配置
+        touch docs/.nojekyll  # 创建.nojekyll文件以禁用Jekyll
+        echo -n docs.comma.ai > docs/CNAME  # 设置CNAME为docs.comma.ai
 
-        git add -f .
-        git commit -m "build docs"
+        git add -f .  # 强制添加所有文件
+        git commit -m "build docs"  # 提交，消息为"build docs"
 
-        # docs live in different repo to not bloat openpilot's full clone size
-        git push -f origin tmp:gh-pages
+        # docs live in different repo to not bloat openpilot's full clone size  # 文档存放在不同的仓库中，以避免增大openpilot的完整克隆大小
+        git push -f origin tmp:gh-pages  # 强制推送tmp分支到远程gh-pages分支

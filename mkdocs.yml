@@ -1,44 +1,100 @@
-site_name: openpilot docs
-repo_url: https://github.com/commaai/openpilot/
+site_name: openpilot中文文档
 site_url: https://docs.comma.ai
-
-exclude_docs: README.md
-
-strict: true
+repo_url: https://github.com/commaai/openpilot
+edit_uri: edit/master/docs
 docs_dir: docs
-site_dir: docs_site/
-
-hooks:
-  - docs/hooks/glossary.py
-extra_css:
-  - css/tooltip.css
+site_dir: docs_site
 theme:
-  name: readthedocs
-  navigation_depth: 3
-
+  name: material
+  favicon: assets/favicon.ico
+  logo: assets/logo.png
+  font:
+    text: Inter
+  features:
+    - content.code.copy
+    - navigation.expand
+    - navigation.indexes
+    - navigation.sections
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - search.highlight
+    - search.share
+    - search.suggest
+  palette:
+    - scheme: default
+      media: "(prefers-color-scheme: light)"
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+      primary: black
+      accent: indigo
+    - scheme: slate
+      media: "(prefers-color-scheme: dark)"
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+      primary: black
+      accent: indigo
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.emoji
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/commaai
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/comma_ai
+    - icon: fontawesome/brands/discord
+      link: https://discord.comma.ai
+    - icon: fontawesome/brands/youtube
+      link: https://www.youtube.com/c/comma_ai
+    - icon: fontawesome/brands/instagram
+      link: https://www.instagram.com/comma.ai
+  analytics:
+    provider: google
+    property: G-R6C0CRGX0K
+plugins:
+  - search
+  - glightbox
 nav:
-  - Getting Started:
-    - What is openpilot?: getting-started/what-is-openpilot.md
-  - How-to:
-    - Turn the speed blue: how-to/turn-the-speed-blue.md
-    - Connect to a comma 3/3X: how-to/connect-to-comma.md
-    # - Make your first pull request: how-to/make-first-pr.md
-    #- Replay a drive: how-to/replay-a-drive.md
-  - Concepts:
-    - Logs: concepts/logs.md
-    - Safety: concepts/safety.md
-    - Glossary: concepts/glossary.md
-  - Car Porting:
-    - What is a car port?: car-porting/what-is-a-car-port.md
-    - Porting a car brand: car-porting/brand-port.md
-    - Porting a car model: car-porting/model-port.md
-  - Contributing:
-    - Roadmap: contributing/roadmap.md
-    #- Architecture: contributing/architecture.md
-    - Contributing Guide →: https://github.com/commaai/openpilot/blob/master/docs/CONTRIBUTING.md
-  - Links:
-    - Blog →: https://blog.comma.ai
-    - Bounties →: https://comma.ai/bounties
-    - GitHub →: https://github.com/commaai
-    - Discord →: https://discord.comma.ai
-    - X →: https://x.com/comma_ai
+  - 首页: zh/index.md
+  - 入门指南:
+    - getting-started/zh/what-is-openpilot.md
+  - 操作指南:
+    - how-to/zh/turn-the-speed-blue.md
+    - how-to/zh/connect-to-comma.md
+  - 概念:
+    - concepts/zh/logs.md
+    - concepts/zh/safety.md
+    - concepts/zh/glossary.md
+  - 车型适配:
+    - car-porting/zh/what-is-a-car-port.md
+    - car-porting/zh/brand-port.md
+    - car-porting/zh/model-port.md
+  - 贡献:
+    - contributing/zh/roadmap.md
+    - 贡献指南: https://github.com/commaai/openpilot/blob/master/docs/CONTRIBUTING.md.zh
+  - 集成: INTEGRATION.md.zh
+  - 限制: LIMITATIONS.md.zh
+  - 支持车型: CARS.md
+  - 安全: SAFETY.md
+  - 模型:
+    - selfdrive/modeld/models/README.md.zh

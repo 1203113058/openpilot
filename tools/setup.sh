@@ -2,16 +2,19 @@
 
 set -e
 
+# 定义颜色代码
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 BOLD='\033[1m'
 NC='\033[0m'
 
+# 如果没有设置OPENPILOT_ROOT，则默认为当前目录
 if [ -z "$OPENPILOT_ROOT" ]; then
   # default to current directory for installation
   OPENPILOT_ROOT="$(pwd)/openpilot"
 fi
 
+# 显示欢迎信息
 function show_motd() {
 cat << 'EOF'
 
@@ -34,6 +37,7 @@ cat << 'EOF'
 EOF
 }
 
+# 发送事件到Sentry进行跟踪
 function sentry_send_event() {
   SENTRY_KEY=dd0cba62ba0ac07ff9f388f8f1e6a7f4
   SENTRY_URL=https://sentry.io/api/4507726145781760/store/
@@ -42,6 +46,7 @@ function sentry_send_event() {
   EVENT_TYPE=${2:-$EVENT}
   EVENT_LOG=${3:-"NA"}
 
+  # 获取系统信息
   PLATFORM=$(uname -s)
   ARCH=$(uname -m)
   SYSTEM=$(uname -a)
@@ -51,22 +56,26 @@ function sentry_send_event() {
     OS="linux"
   fi
 
+  # 标准化架构名称
   if [[ $ARCH == armv8* ]] || [[ $ARCH == arm64* ]] || [[ $ARCH == aarch64* ]]; then
     ARCH="aarch64"
   elif [[ $ARCH == "x86_64" ]] || [[ $ARCH == i686* ]]; then
     ARCH="x86"
   fi
 
+  # 获取Python版本和Git信息
   PYTHON_VERSION=$(echo $(python3 --version 2> /dev/null || echo "NA"))
   BRANCH=$(echo $(git -C $OPENPILOT_ROOT rev-parse --abbrev-ref HEAD 2> /dev/null || echo "NA"))
   COMMIT=$(echo $(git -C $OPENPILOT_ROOT rev-parse HEAD 2> /dev/null || echo "NA"))
 
+  # 发送数据到Sentry
   curl -s -o /dev/null -X POST -g --data "{ \"exception\": { \"values\": [{ \"type\": \"$EVENT\" }] }, \"tags\" : { \"event_type\" : \"$EVENT_TYPE\", \"event_log\" : \"$EVENT_LOG\", \"os\" : \"$OS\", \"arch\" : \"$ARCH\", \"python_version\" : \"$PYTHON_VERSION\" , \"git_branch\" : \"$BRANCH\", \"git_commit\" : \"$COMMIT\", \"system\" : \"$SYSTEM\" }  }" \
     -H 'Content-Type: application/json' \
     -H "X-Sentry-Auth: Sentry sentry_version=7, sentry_key=$SENTRY_KEY, sentry_client=op_setup/0.1" \
     $SENTRY_URL 2> /dev/null
 }
 
+# 检查是否为交互式运行
 function check_stdin() {
   if [ -t 0 ]; then
     INTERACTIVE=1
@@ -77,6 +86,7 @@ function check_stdin() {
   fi
 }
 
+# 询问安装目录
 function ask_dir() {
   echo -n "Enter directory in which to install openpilot (default $OPENPILOT_ROOT): "
 
@@ -93,12 +103,13 @@ function ask_dir() {
   fi
 }
 
+# 检查安装目录是否有效
 function check_dir() {
   echo "Checking for installation directory..."
   if [ -d "$OPENPILOT_ROOT" ]; then
     echo -e " ↳ [${RED}✗${NC}] Installation destination $OPENPILOT_ROOT already exists!"
 
-    # not a valid clone, can't continue
+    # 不是有效的克隆，无法继续
     if [[ ! -z "$(ls -A $OPENPILOT_ROOT)" && ! -f "$OPENPILOT_ROOT/launch_openpilot.sh" ]]; then
       echo -e "       $OPENPILOT_ROOT already contains files but does not seems"
       echo -e "       to be a valid openpilot git clone. Choose another location for"
@@ -106,12 +117,12 @@ function check_dir() {
       return 1
     fi
 
-    # already a "valid" openpilot clone, skip cloning again
+    # 已经是有效的openpilot克隆，跳过再次克隆
     if [[ ! -z "$(ls -A $OPENPILOT_ROOT)" ]]; then
       SKIP_GIT_CLONE=1
     fi
 
-    # by default, don't try installing in already existing directory
+    # 默认情况下，不尝试在已存在的目录中安装
     if [[ -z $INTERACTIVE ]]; then
       return 0
     fi
@@ -128,6 +139,7 @@ function check_dir() {
   echo -e " ↳ [${GREEN}✔${NC}] Successfully chosen $OPENPILOT_ROOT as installation directory\n"
 }
 
+# 检查git是否已安装
 function check_git() {
   echo "Checking for git..."
   if ! command -v "git" > /dev/null 2>&1; then
@@ -139,6 +151,7 @@ function check_git() {
   fi
 }
 
+# 克隆openpilot仓库
 function git_clone() {
   st="$(date +%s)"
   echo "Cloning openpilot..."
@@ -155,6 +168,7 @@ function git_clone() {
   return 1
 }
 
+# 使用op.sh工具安装openpilot
 function install_with_op() {
   cd $OPENPILOT_ROOT
   $OPENPILOT_ROOT/tools/op.sh install
@@ -180,6 +194,7 @@ function install_with_op() {
   echo -e "Checkout how to contribute at https://github.com/commaai/openpilot/blob/master/docs/CONTRIBUTING.md"
 }
 
+# 执行安装流程
 show_motd
 check_stdin
 ask_dir
