@@ -1,272 +1,348 @@
 [project]
-name = "openpilot"
-requires-python = ">= 3.11, < 3.13"
-license = {text = "MIT License"}
-version = "0.1.0"
-description = "an open source driver assistance system"
+name = "openpilot"  # 项目名称
+requires-python = ">= 3.11, < 3.13"  # 需要的 Python 版本
+license = {text = "MIT License"}  # 许可证
+version = "0.1.0"  # 版本号
+description = "an open source driver assistance system"  # 描述
 authors = [
-  {name ="Vehicle Researcher", email="user@comma.ai"}
+  {name ="Vehicle Researcher", email="user@comma.ai"}  # 作者信息
 ]
 
 dependencies = [
-  # multiple users
-  "sounddevice",  # micd + soundd
-  "pyserial",     # pigeond + qcomgpsd
-  "requests",     # many one-off uses
-  "sympy",        # rednose + friends
-  "crcmod",       # cars + qcomgpsd
-  "tqdm",         # cars (fw_versions.py) on start + many one-off uses
+  # multiple users - 多用户共享的依赖
+  "sounddevice",  # micd + soundd  # 声音设备库，用于处理麦克风输入和音频输出
+  "pyserial",     # pigeond + qcomgpsd  # 串口通信库，用于与GPS设备和硬件进行串口通信
+  "requests",     # many one-off uses  # HTTP请求库，用于各种网络请求操作
+  "sympy",        # rednose + friends  # 符号数学计算库，用于复杂的数学运算
+  "crcmod",       # cars + qcomgpsd  # 循环冗余校验库，用于数据完整性验证
+  "tqdm",         # cars (fw_versions.py) on start + many one-off uses  # 进度条显示库，用于显示长时间操作的进度
 
-  # hardwared
-  "smbus2", # configuring amp
+  # hardwared - 硬件相关依赖
+  "smbus2", # configuring amp  # I2C总线通信库，用于配置音频放大器
 
-  # core
-  "cffi",
-  "scons",
-  "pycapnp",
-  "Cython",
-  "setuptools",
-  "numpy >=2.0, <2.2", # Linting issues with mypy in 2.2
+  # core - 核心依赖
+  "cffi",         # C语言外部函数接口，用于Python和C代码的交互
+  "scons",        # 软件构建工具，用于编译和构建项目
+  "pycapnp",      # Cap'n Proto序列化库，用于高效的数据序列化
+  "Cython",       # C语言扩展工具，用于编写高性能的Python扩展
+  "setuptools",   # Python包管理工具，用于安装和分发Python包
+  "numpy >=2.0, <2.2", # 数值计算库，用于科学计算和数组操作
 
-  # body / webrtcd
-  "aiohttp",
-  "aiortc",
+  # body / webrtcd - 车身和WebRTC相关依赖
+  "aiohttp",      # 异步HTTP客户端/服务器库，用于异步网络通信
+  "aiortc",       # WebRTC库，用于实时通信
   # aiortc does not put an upper bound on pyopenssl and is now incompatible
   # with the latest release
-  "pyopenssl < 24.3.0",
-  "pyaudio",
+  "pyopenssl < 24.3.0", # OpenSSL接口库，用于SSL/TLS加密通信
+  "pyaudio",      # 音频处理库，用于音频输入输出
 
-  # panda
-  "libusb1",
-  "spidev; platform_system == 'Linux'",
+  # panda - Panda设备相关依赖
+  "libusb1",      # USB通信库，用于与Panda设备通信
+  "spidev; platform_system == 'Linux'", # SPI设备接口，仅用于Linux系统
 
-  # modeld
-  "onnx >= 1.14.0",
-  "llvmlite",
+  # modeld - 模型相关依赖
+  "onnx >= 1.14.0", # 开放神经网络交换格式，用于模型部署
+  "llvmlite",     # LLVM编译器基础设施，用于代码优化
 
-  # logging
-  "pyzmq",
-  "sentry-sdk",
-  "xattr", # used in place of 'os.getxattr' for macos compatibility
+  # logging - 日志相关依赖
+  "pyzmq",        # ZeroMQ消息队列库，用于进程间通信
+  "sentry-sdk",   # 错误跟踪和性能监控
+  "xattr",        # 扩展属性操作库，用于文件系统属性管理
 
-  # athena
-  "PyJWT",
-  "json-rpc",
-  "websocket_client",
+  # athena - 云服务相关依赖
+  "PyJWT",        # JSON Web Token库，用于身份验证
+  "json-rpc",     # JSON-RPC协议库，用于远程过程调用
+  "websocket_client", # WebSocket客户端库，用于实时通信
 
-  # acados deps
-  "casadi >=3.6.6",  # 3.12 fixed in 3.6.6
-  "future-fstrings",
+  # acados deps - 优化求解器相关依赖
+  "casadi >=3.6.6", # 非线性优化求解器，用于控制算法
+  "future-fstrings", # 未来字符串格式化支持
 
-  # joystickd
-  "inputs",
+  # joystickd - 游戏手柄相关依赖
+  "inputs",       # 输入设备控制库，用于游戏手柄操作
 
-  # these should be removed
-  "psutil",
-  "pycryptodome", # used in updated/casync, panda, body, and a test
-  "setproctitle",
+  # 这些应该被移除的依赖
+  "psutil",       # 系统和进程监控库
+  "pycryptodome", # 加密库，用于安全通信
+  "setproctitle", # 进程标题设置库
 
-  # logreader
-  "zstandard",
+  # logreader - 日志读取相关依赖
+  "zstandard",    # 压缩算法库，用于日志压缩
 
-  # ui
-  "qrcode",
+  # ui - 用户界面相关依赖
+  "qrcode",       # 二维码生成库，用于生成二维码
 ]
 
 [project.optional-dependencies]
 docs = [
-  "Jinja2",
-  "natsort",
-  "mkdocs",
+  "Jinja2",       # 模板引擎，用于生成文档
+  "natsort",      # 自然排序库，用于文件排序
+  "mkdocs",       # 文档生成工具，用于构建项目文档
 ]
 
 testing = [
-  "coverage",
-  "hypothesis ==6.47.*",
-  "mypy",
-  "pytest",
-  "pytest-cov",
-  "pytest-cpp",
-  "pytest-subtests",
+  "coverage",     # 代码覆盖率工具
+  "hypothesis ==6.47.*", # 属性测试框架
+  "mypy",         # 静态类型检查器
+  "pytest",       # 测试框架
+  "pytest-cov",   # 测试覆盖率插件
+  "pytest-cpp",   # C++测试支持
+  "pytest-subtests", # 子测试支持
   # https://github.com/pytest-dev/pytest-xdist/issues/1215
-  "pytest-xdist @ git+https://github.com/sshane/pytest-xdist@909e97b49d12401c10608f9d777bfc9dab8a4413",
-  "pytest-timeout",
-  "pytest-randomly",
-  "pytest-asyncio",
-  "pytest-mock",
-  "pytest-repeat",
-  "ruff",
-  "codespell",
-  "pre-commit-hooks",
+  "pytest-xdist @ git+https://github.com/sshane/pytest-xdist@909e97b49d12401c10608f9d777bfc9dab8a4413", # 并行测试支持
+  "pytest-timeout", # 测试超时控制
+  "pytest-randomly", # 随机测试顺序
+  "pytest-asyncio", # 异步测试支持
+  "pytest-mock",  # 模拟对象支持
+  "pytest-repeat", # 测试重复执行
+  "ruff",         # Python代码检查工具
+  "codespell",    # 代码拼写检查
+  "pre-commit-hooks", # Git预提交钩子
 ]
 
 dev = [
-  "av",
-  "azure-identity",
-  "azure-storage-blob",
-  "dbus-next",
-  "dictdiffer",
-  "lru-dict",
-  "matplotlib",
-  "parameterized >=0.8, <0.9",
-  "pyautogui",
-  "pygame",
-  "pyopencl; platform_machine != 'aarch64'", # broken on arm64
-  "pytools < 2024.1.11; platform_machine != 'aarch64'", # pyopencl use a broken version
-  "pywinctl",
-  "pyprof2calltree",
-  "tabulate",
-  "types-requests",
-  "types-tabulate",
-  "raylib",
+  "av",           # 音视频处理库
+  "azure-identity", # Azure身份认证
+  "azure-storage-blob", # Azure存储服务
+  "dbus-next",    # D-Bus通信库
+  "dictdiffer",   # 字典差异比较
+  "lru-dict",     # LRU缓存字典
+  "matplotlib",   # 数据可视化库
+  "parameterized >=0.8, <0.9", # 参数化测试支持
+  "pyautogui",    # GUI自动化
+  "pygame",       # 游戏开发库
+  "pyopencl; platform_machine != 'aarch64'", # OpenCL支持（不支持ARM64架构）
+  "pytools < 2024.1.11; platform_machine != 'aarch64'", # Python工具集（不支持ARM64架构）
+  "pywinctl",     # 窗口控制
+  "pyprof2calltree", # 性能分析工具
+  "tabulate",     # 表格格式化
+  "types-requests", # requests类型提示
+  "types-tabulate", # tabulate类型提示
+  "raylib",       # 游戏开发库
 ]
 
 tools = [
-  "metadrive-simulator @ https://github.com/commaai/metadrive/releases/download/MetaDrive-minimal-0.4.2.4/metadrive_simulator-0.4.2.4-py3-none-any.whl ; (platform_machine != 'aarch64')",
-  "rerun-sdk >= 0.18",
+  "metadrive-simulator @ https://github.com/commaai/metadrive/releases/download/MetaDrive-minimal-0.4.2.4/metadrive_simulator-0.4.2.4-py3-none-any.whl ; (platform_machine != 'aarch64')", # 驾驶模拟器（不支持ARM64架构）
+  "rerun-sdk >= 0.18", # 可视化工具
 ]
 
 [project.urls]
-Homepage = "https://github.com/commaai/openpilot"
+Homepage = "https://github.com/commaai/openpilot"  # 主页
 
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["hatchling"]  # 构建系统依赖
+build-backend = "hatchling.build"  # 构建后端
 
 [tool.hatch.build.targets.wheel]
-packages = [ "." ]
+packages = [ "." ]  # 打包目录
 
 [tool.hatch.metadata]
-allow-direct-references = true
+allow-direct-references = true  # 允许直接引用
 
 [tool.pytest.ini_options]
-minversion = "6.0"
-addopts = "--ignore=openpilot/ --ignore=opendbc/ --ignore=panda/ --ignore=rednose_repo/ --ignore=tinygrad_repo/ --ignore=teleoprtc_repo/ --ignore=msgq/  -Werror --strict-config --strict-markers --durations=10 -n auto --dist=loadgroup"
-cpp_files = "test_*"
-cpp_harness = "selfdrive/test/cpp_harness.py"
-python_files = "test_*.py"
-asyncio_default_fixture_loop_scope = "function"
-#timeout = "30"  # you get this long by default
+minversion = "6.0"  # 最小版本
+addopts = "--ignore=openpilot/ --ignore=opendbc/ --ignore=panda/ --ignore=rednose_repo/ --ignore=tinygrad_repo/ --ignore=teleoprtc_repo/ --ignore=msgq/  -Werror --strict-config --strict-markers --durations=10 -n auto --dist=loadgroup"  # 测试选项
+cpp_files = "test_*"  # C++ 测试文件
+cpp_harness = "selfdrive/test/cpp_harness.py"  # C++ 测试框架
+python_files = "test_*.py"  # Python 测试文件
+asyncio_default_fixture_loop_scope = "function"  # 异步测试默认作用域
+#timeout = "30"  # you get this long by default  # 超时时间
 markers = [
-  "slow: tests that take awhile to run and can be skipped with -m 'not slow'",
-  "tici: tests that are only meant to run on the C3/C3X",
-  "skip_tici_setup: mark test to skip tici setup fixture"
+  "slow: tests that take awhile to run and can be skipped with -m 'not slow'",  # 慢测试标记
+  "tici: tests that are only meant to run on the C3/C3X",  # TICI 设备专用测试
+  "skip_tici_setup: mark test to skip tici setup fixture"  # 跳过 TICI 设置
 ]
 testpaths = [
-  "common",
-  "selfdrive",
-  "system/updated",
-  "system/athena",
-  "system/camerad",
-  "system/hardware",
-  "system/loggerd",
-  "system/proclogd",
-  "system/tests",
-  "system/ubloxd",
-  "system/webrtc",
-  "tools/lib/tests",
-  "tools/replay",
-  "tools/cabana",
-  "cereal/messaging/tests",
+  "common",  # 公共测试路径
+  "selfdrive",  # 自动驾驶测试路径
+  "system/updated",  # 系统更新测试路径
+  "system/athena",  # Athena 测试路径
+  "system/camerad",  # 摄像头测试路径
+  "system/hardware",  # 硬件测试路径
+  "system/loggerd",  # 日志记录测试路径
+  "system/proclogd",  # 进程日志测试路径
+  "system/tests",  # 系统测试路径
+  "system/ubloxd",  # U-Blox 测试路径
+  "system/webrtc",  # WebRTC 测试路径
+  "tools/lib/tests",  # 工具库测试路径
+  "tools/replay",  # 回放工具测试路径
+  "tools/cabana",  # Cabana 工具测试路径
+  "cereal/messaging/tests",  # 消息测试路径
 ]
 
 [tool.codespell]
-quiet-level = 3
-# if you've got a short variable name that's getting flagged, add it here
-ignore-words-list = "bu,ro,te,ue,alo,hda,ois,nam,nams,ned,som,parm,setts,inout,warmup,bumb,nd,sie,preints,whit,indexIn,ws,uint,grey,deque,stdio,amin,BA,LITE,atEnd,UIs,errorString,arange,FocusIn,od,tim,relA,hist,copyable,jupyter,thead,TGE,abl,lite"
-builtin = "clear,rare,informal,code,names,en-GB_to_en-US"
-skip = "./third_party/*, ./tinygrad/*, ./tinygrad_repo/*, ./msgq/*, ./panda/*, ./opendbc/*, ./opendbc_repo/*, ./rednose/*, ./rednose_repo/*, ./teleoprtc/*, ./teleoprtc_repo/*, *.ts, uv.lock, *.onnx, ./cereal/gen/*, */c_generated_code/*, docs/assets/*"
+quiet-level = 3  # 安静级别
+# if you've got a short variable name that's getting flagged, add it here  # 如果变量名被标记，可以在这里添加
+ignore-words-list = "bu,ro,te,ue,alo,hda,ois,nam,nams,ned,som,parm,setts,inout,warmup,bumb,nd,sie,preints,whit,indexIn,ws,uint,grey,deque,stdio,amin,BA,LITE,atEnd,UIs,errorString,arange,FocusIn,od,tim,relA,hist,copyable,jupyter,thead,TGE,abl,lite"  # 忽略的单词列表
+builtin = "clear,rare,informal,code,names,en-GB_to_en-US"  # 内置词典
+skip = "./third_party/*, ./tinygrad/*, ./tinygrad_repo/*, ./msgq/*, ./panda/*, ./opendbc/*, ./opendbc_repo/*, ./rednose/*, ./rednose_repo/*, ./teleoprtc/*, ./teleoprtc_repo/*, *.ts, uv.lock, *.onnx, ./cereal/gen/*, */c_generated_code/*, docs/assets/*"  # 跳过的路径
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.11"  # Python 版本
 plugins = [
-  "numpy.typing.mypy_plugin",
+  "numpy.typing.mypy_plugin",  # NumPy 类型插件
 ]
 exclude = [
-  "cereal/",
-  "msgq/",
-  "msgq_repo/",
-  "opendbc/",
-  "opendbc_repo/",
-  "panda/",
-  "rednose/",
-  "rednose_repo/",
-  "tinygrad/",
-  "tinygrad_repo/",
-  "teleoprtc/",
-  "teleoprtc_repo/",
-  "third_party/",
+  "cereal/",  # 排除 cereal 目录
+  "msgq/",  # 排除 msgq 目录
+  "msgq_repo/",  # 排除 msgq_repo 目录
+  "opendbc/",  # 排除 opendbc 目录
+  "opendbc_repo/",  # 排除 opendbc_repo 目录
+  "panda/",  # 排除 panda 目录
+  "rednose/",  # 排除 rednose 目录
+  "rednose_repo/",  # 排除 rednose_repo 目录
+  "tinygrad/",  # 排除 tinygrad 目录
+  "tinygrad_repo/",  # 排除 tinygrad_repo 目录
+  "teleoprtc/",  # 排除 teleoprtc 目录
+  "teleoprtc_repo/",  # 排除 teleoprtc_repo 目录
+  "third_party/",  # 排除 third_party 目录
 ]
 
 # third-party packages
-ignore_missing_imports=true
+ignore_missing_imports=true  # 忽略缺失的导入
 
 # helpful warnings
-warn_redundant_casts=true
-warn_unreachable=true
-warn_unused_ignores=true
+warn_redundant_casts=true  # 警告冗余类型转换
+warn_unreachable=true  # 警告不可达代码
+warn_unused_ignores=true  # 警告未使用的忽略
 
 # restrict dynamic typing
-warn_return_any=true
+warn_return_any=true  # 警告返回 Any 类型
 
 # allow implicit optionals for default args
-implicit_optional = true
+implicit_optional = true  # 允许隐式可选参数
 
-local_partial_types=true
-explicit_package_bases=true
-disable_error_code = "annotation-unchecked"
+local_partial_types=true  # 局部部分类型
+explicit_package_bases=true  # 显式包基础
+disable_error_code = "annotation-unchecked"  # 禁用未检查的注解错误
 
 # https://beta.ruff.rs/docs/configuration/#using-pyprojecttoml
 [tool.ruff]
-indent-width = 2
+indent-width = 2  # 缩进宽度
 lint.select = [
-  "E", "F", "W", "PIE", "C4", "ISC", "A", "B",
-  "NPY", # numpy
-  "UP",  # pyupgrade
-  "TRY203", "TRY400", "TRY401", # try/excepts
-  "RUF008", "RUF100",
-  "TID251",
-  "PLR1704",
+  "E", "F", "W", "PIE", "C4", "ISC", "A", "B",  # 选择的 lint 规则
+  "NPY", # numpy  # NumPy 规则
+  "UP",  # pyupgrade  # PyUpgrade 规则
+  "TRY203", "TRY400", "TRY401", # try/excepts  # Try/Except 规则
+  "RUF008", "RUF100",  # Ruff 规则
+  "TID251",  # TID 规则
+  "PLR1704",  # PLR 规则
 ]
 lint.ignore = [
-  "E741",
-  "E402",
-  "C408",
-  "ISC003",
-  "B027",
-  "B024",
-  "NPY002",  # new numpy random syntax is worse
-  "UP038",   # (x, y) -> x|y for isinstance
+  "E741",  # 忽略 E741 错误
+  "E402",  # 忽略 E402 错误
+  "C408",  # 忽略 C408 错误
+  "ISC003",  # 忽略 ISC003 错误
+  "B027",  # 忽略 B027 错误
+  "B024",  # 忽略 B024 错误
+  "NPY002",  # (x, y) -> x|y for isinstance  # 忽略 NPY002 错误
+  "UP038",   # (x, y) -> x|y for isinstance  # 忽略 UP038 错误
 ]
-line-length = 160
-target-version ="py311"
+line-length = 160  # 行长度
+target-version ="py311"  # 目标 Python 版本
 exclude = [
-  "body",
-  "cereal",
-  "panda",
-  "opendbc",
-  "opendbc_repo",
-  "rednose_repo",
-  "tinygrad_repo",
-  "teleoprtc",
-  "teleoprtc_repo",
-  "third_party",
-  "*.ipynb",
+  "body",  # 排除 body 目录
+  "cereal",  # 排除 cereal 目录
+  "panda",  # 排除 panda 目录
+  "opendbc",  # 排除 opendbc 目录
+  "opendbc_repo",  # 排除 opendbc_repo 目录
+  "rednose_repo",  # 排除 rednose_repo 目录
+  "tinygrad_repo",  # 排除 tinygrad_repo 目录
+  "teleoprtc",  # 排除 teleoprtc 目录
+  "teleoprtc_repo",  # 排除 teleoprtc_repo 目录
+  "third_party",  # 排除 third_party 目录
+  "*.ipynb",  # 排除 Jupyter 笔记本
 ]
-lint.flake8-implicit-str-concat.allow-multiline = false
+lint.flake8-implicit-str-concat.allow-multiline = false  # 不允许多行隐式字符串连接
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
-"selfdrive".msg = "Use openpilot.selfdrive"
-"common".msg = "Use openpilot.common"
-"system".msg = "Use openpilot.system"
-"third_party".msg = "Use openpilot.third_party"
-"tools".msg = "Use openpilot.tools"
-"pytest.main".msg = "pytest.main requires special handling that is easy to mess up!"
-"unittest".msg = "Use pytest"
-"pyray.measure_text_ex".msg = "Use openpilot.system.ui.lib.text_measure"
+"selfdrive".msg = "Use openpilot.selfdrive"  # 使用 openpilot.selfdrive
+"common".msg = "Use openpilot.common"  # 使用 openpilot.common
+"system".msg = "Use openpilot.system"  # 使用 openpilot.system
+"third_party".msg = "Use openpilot.third_party"  # 使用 openpilot.third_party
+"tools".msg = "Use openpilot.tools"  # 使用 openpilot.tools
+"pytest.main".msg = "pytest.main requires special handling that is easy to mess up!"  # pytest.main 需要特殊处理
+"unittest".msg = "Use pytest"  # 使用 pytest
+"pyray.measure_text_ex".msg = "Use openpilot.system.ui.lib.text_measure"  # 使用 openpilot.system.ui.lib.text_measure
 
 [tool.coverage.run]
-concurrency = ["multiprocessing", "thread"]
+concurrency = ["multiprocessing", "thread"]  # 并发模式
 
 [tool.ruff.format]
-quote-style = "preserve"
+quote-style = "preserve"  # 保留引号样式
+
+[tool.dependencies]
+sounddevice = "声音设备"
+pyserial = "串口通信"
+requests = "HTTP 请求库"
+sympy = "符号数学库"
+crcmod = "循环冗余校验"
+tqdm = "进度条库"
+smbus2 = "I2C 通信库"
+cffi = "C 语言绑定"
+scons = "构建工具"
+pycapnp = "Cap'n Proto 序列化库"
+Cython = "Cython 编译器"
+setuptools = "Python 打包工具"
+numpy = "数值计算库"
+aiohttp = "异步 HTTP 客户端/服务器"
+aiortc = "WebRTC 实现"
+pyopenssl = "SSL/TLS 加密库"
+pyaudio = "音频 I/O"
+libusb1 = "USB 通信库"
+spidev = "SPI 通信库（仅限 Linux）"
+onnx = "ONNX 模型格式"
+llvmlite = "LLVM 编译器库"
+pyzmq = "零消息队列"
+sentry-sdk = "错误跟踪"
+xattr = "扩展属性库"
+PyJWT = "JSON Web Token"
+json-rpc = "JSON-RPC 协议"
+websocket_client = "WebSocket 客户端"
+casadi = "符号优化库"
+future-fstrings = "未来字符串格式化"
+inputs = "输入设备库"
+psutil = "系统监控"
+pycryptodome = "加密库"
+setproctitle = "进程标题设置"
+zstandard = "Zstandard 压缩库"
+qrcode = "二维码生成库"
+Jinja2 = "模板引擎"
+natsort = "自然排序"
+mkdocs = "文档生成器"
+coverage = "测试覆盖率"
+hypothesis = "基于属性的测试"
+mypy = "静态类型检查"
+pytest = "测试框架"
+pytest-cov = "Pytest 覆盖率插件"
+pytest-cpp = "C++ 测试支持"
+pytest-subtests = "子测试支持"
+pytest-xdist = "分布式测试"
+pytest-timeout = "测试超时"
+pytest-randomly = "随机测试顺序"
+pytest-asyncio = "异步测试支持"
+pytest-mock = "Mock 支持"
+pytest-repeat = "测试重复"
+ruff = "代码格式化和 linting"
+codespell = "拼写检查"
+pre-commit-hooks = "预提交钩子"
+av = "视频处理"
+azure-identity = "Azure 身份验证"
+azure-storage-blob = "Azure Blob 存储"
+dbus-next = "D-Bus 通信"
+dictdiffer = "字典差异"
+lru-dict = "LRU 缓存"
+matplotlib = "数据可视化"
+parameterized = "参数化测试"
+pyautogui = "自动化 GUI"
+pygame = "游戏开发"
+pyopencl = "OpenCL 绑定"
+pytools = "工具库"
+pywinctl = "窗口控制"
+pyprof2calltree = "性能分析"
+tabulate = "表格格式化"
+types-requests = "requests 类型提示"
+types-tabulate = "tabulate 类型提示"
+raylib = "游戏开发"
+metadrive-simulator = "MetaDrive 模拟器"
+rerun-sdk = "Rerun SDK"
